@@ -89,18 +89,18 @@ def get_filtered(file_name: str) -> str:
     return file_name
 
 
-def find_files_by_dir_name(dir_names: list, pdf_file_names: list, filt=False) -> dict or None:
+def find_files_by_dir_name(dir_names: list, pdf_file_names: list, fltr=False) -> dict or None:
     """
     Find pdf file names in file names list by dir name.
     :param dir_names:
     :param pdf_file_names:
-    :param filt: bool
+    :param fltr: bool
     :return: sorted_pdf_by_dir_name (dict (key is dir name, value is file name))
     """
     sorted_pdf_by_dir_name = dict()
     for dir_name in dir_names:
         for pdf_file_name in pdf_file_names:
-            if not filt:
+            if not fltr:
                 if dir_name.split('\\')[-1] in pdf_file_name:
                     sorted_pdf_by_dir_name.update({dir_name: pdf_file_name})
             else:
@@ -159,7 +159,7 @@ if __name__ == '__main__':
         pdf_file_names_list = get_files_from_non_sorted_dir('pdf')
         if pdf_file_names_list is not None:
             dir_names_list = get_folders_list()
-            sorted_pdf_list = find_files_by_dir_name(dir_names_list, pdf_file_names_list, filt=filtered)
+            sorted_pdf_list = find_files_by_dir_name(dir_names_list, pdf_file_names_list, fltr=filtered)
             if sorted_pdf_list is not None:
                 move_files_to_dir(sorted_pdf_list)
             pdf_file_names_list = get_files_from_non_sorted_dir('pdf')
