@@ -2,8 +2,34 @@ import os
 import time
 
 
-WORK_DIR = 'D:\\Mokaups\\Mockups A decals-20220522T074604Z\\Mockups A decals'
+WORK_DIR = 'D:\\Mokaups\\Mockups A decals'
 NON_SORTED = 'non sorted'
+
+
+def make_non_sorted_dir():
+    """
+    Make NON SORTED directory  in work directory if that not exist
+    :return:
+    """
+    if not os.path.isdir(f'{WORK_DIR}\\{NON_SORTED.capitalize()}'):
+        os.mkdir(f'{WORK_DIR}\\{NON_SORTED.capitalize()}')
+
+
+def copy_files_to_non_sorted():
+    """
+    Copy all files from work dir not placed in directories to NON SORTED directory
+    :return:
+    """
+    file_names_list = [f'{WORK_DIR}\\{file_name}' for file_name in os.listdir(WORK_DIR)
+                       if os.path.isfile(f'{WORK_DIR}\\{file_name}')]
+    for file_name in file_names_list:
+        try:
+            src = file_name
+            dst = f'{WORK_DIR}\\{NON_SORTED.capitalize()}\\{get_file_name_from_path(file_name)}'
+            os.rename(src, dst)
+        except Exception as ex:
+            print(f'Error: {ex}')
+            print(file_name)
 
 
 def get_folders_list() -> list:
@@ -57,9 +83,9 @@ def get_filtered(file_name: str) -> str:
     :param file_name:
     :return: file_name
     """
-    elements = ('-and', '-of')
+    elements = ('-and-', '-of-', '-in-', '-on-')
     for element in elements:
-        file_name = file_name.replace(element, '')
+        file_name = file_name.replace(element, '-')
     return file_name
 
 
@@ -114,6 +140,9 @@ def move_files_to_dir(sorted_pdf_by_dir_name: dict):
 
 
 if __name__ == '__main__':
+    # prepare work directory
+    make_non_sorted_dir()
+    copy_files_to_non_sorted()
     # move to directories jpg files from NON SORTED directory
     jpg_file_names_list = get_files_from_non_sorted_dir('jpg')
     if jpg_file_names_list is not None:
@@ -124,6 +153,7 @@ if __name__ == '__main__':
             move_files_to_dir(sorted_jpg_list)
 
     # find and move pdf files (license) to mockup directory process
+    # if first time didn't move all pdf files try again with filter option
     filtered = False
     while True:
         pdf_file_names_list = get_files_from_non_sorted_dir('pdf')
