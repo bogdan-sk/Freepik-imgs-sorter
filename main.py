@@ -1,5 +1,6 @@
 import os
 import time
+from random import randint
 
 
 WORK_DIR = 'D:\\Mokaups\\Mockups A decals'
@@ -28,8 +29,8 @@ def copy_files_to_non_sorted():
             dst = f'{WORK_DIR}\\{NON_SORTED.capitalize()}\\{get_file_name_from_path(file_name)}'
             os.rename(src, dst)
         except Exception as ex:
-            print(f'Error: {ex}')
-            print(file_name)
+            print(f"[!] Error: {ex}")
+            print(f"[!] {file_name}")
 
 
 def get_folders_list() -> list:
@@ -74,7 +75,7 @@ def get_unique_code() -> str:
     Get time stamp in milliseconds like a unique code for files
     :return: code
     """
-    return str(int(time.time()*1000000))
+    return f"{str(int(time.time()*1000000))}-{randint(100, 999)}"
 
 
 def get_filtered(file_name: str) -> str:
@@ -135,8 +136,71 @@ def move_files_to_dir(sorted_pdf_by_dir_name: dict):
             dst = f"{dir_path}\\{get_file_name_from_path(file_path)}"
             os.rename(src, dst)
         except Exception as ex:
-            print(f"Error: {ex}")
-            print(f"{file_path}")
+            print(f"[!] Error: {ex}")
+            print(f"[!] {file_path}")
+
+
+def get_work_dir_structure() -> dict or None:
+    """
+    Find all directories in work directory. Write in dictionary with key like name of directory.
+    Value is list of nested file names. Ignore NON SORTED directory.
+    :return: work_dir_structure (key is directory name, values are nested files)
+    """
+    dir_names_ignor = ('IMG', 'MOCKUPS', 'LICENSES', NON_SORTED)
+    dirs_list = [f"{WORK_DIR}\\{dir_name}" for dir_name in os.listdir(WORK_DIR)
+                 if os.path.isdir(f"{WORK_DIR}\\{dir_name}") and dir_name not in dir_names_ignor]
+    work_dir_structure = dict()
+    for dir_name in dirs_list:
+        nested_files = [file_name for file_name in os.listdir(dir_name)
+                        if os.path.isfile(f"{dir_name}\\{file_name}")]
+        work_dir_structure.update({dir_name: nested_files})
+    if len(work_dir_structure) > 0:
+        return work_dir_structure
+    else:
+        return None
+
+
+def create_dirs_for_separate():
+    """
+    Create 3 directories in work directory. IMG, MOCKUPS, LICENSES
+    :return:
+    """
+    dir_names = ('IMG', 'MOCKUPS', 'LICENSES')
+    for dir_name in dir_names:
+        dir_path = f"{WORK_DIR}\\{dir_name}"
+        if not os.path.isdir(dir_path):
+            try:
+                os.mkdir(dir_path)
+            except Exception as ex:
+                print(f"[!] Error: {ex}")
+
+
+def move_files_to_separ_dirs(work_dir_structure: dict):
+    """
+    Move files by extensions to dirs
+    :param work_dir_structure:
+    :return:
+    """
+    dir_names = (f"{WORK_DIR}\\IMG", f"{WORK_DIR}\\MOCKUPS", f"{WORK_DIR}\\LICENSES")
+    extensions = {'jpg': dir_names[0],
+                  'png': dir_names[0],
+                  'psd': dir_names[1],
+                  'eps': dir_names[1],
+                  'ai': dir_names[1],
+                  'pdf': dir_names[2],
+                  'txt': dir_names[2]}
+    for src_dir_name, file_names in work_dir_structure.items():
+        code = get_unique_code()
+        for file_name in file_names:
+            if file_name.split('.')[-1] not in extensions.keys():
+                continue
+            src = f"{src_dir_name}\\{file_name}"
+            dst = f"{extensions[file_name.split('.')[-1]]}\\{code}_{file_name}"
+            try:
+                os.rename(src, dst)
+            except Exception as ex:
+                print(f"[!] Error: {ex}")
+                print(f"[!] {dst}")
 
 
 if __name__ == '__main__':
@@ -167,3 +231,8 @@ if __name__ == '__main__':
                 filtered = True
             else:
                 break
+
+    # copy to separate directories images, mockups, license files
+    create_dirs_for_separate()
+    wd_structure = get_work_dir_structure()
+    move_files_to_separ_dirs(wd_structure)
