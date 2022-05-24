@@ -13,7 +13,7 @@ def make_non_sorted_dir():
     :return:
     """
     if not os.path.isdir(f'{WORK_DIR}\\{NON_SORTED.capitalize()}'):
-        os.mkdir(f'{WORK_DIR}\\{NON_SORTED.capitalize()}')
+        os.mkdir(f'{WORK_DIR}\\{NON_SORTED.upper()}')
 
 
 def copy_files_to_non_sorted():
