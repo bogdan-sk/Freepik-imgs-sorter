@@ -12,7 +12,7 @@ def make_non_sorted_dir():
     Make NON SORTED directory  in work directory if that not exist
     :return:
     """
-    if not os.path.isdir(f'{WORK_DIR}\\{NON_SORTED.capitalize()}'):
+    if not os.path.isdir(f'{WORK_DIR}\\{NON_SORTED.upper()}'):
         os.mkdir(f'{WORK_DIR}\\{NON_SORTED.upper()}')
 
 
@@ -146,7 +146,7 @@ def get_work_dir_structure() -> dict or None:
     Value is list of nested file names. Ignore NON SORTED directory.
     :return: work_dir_structure (key is directory name, values are nested files)
     """
-    dir_names_ignor = ('IMG', 'MOCKUPS', 'LICENSES', NON_SORTED)
+    dir_names_ignor = ('MOCKUPS', 'LICENSES', NON_SORTED)
     dirs_list = [f"{WORK_DIR}\\{dir_name}" for dir_name in os.listdir(WORK_DIR)
                  if os.path.isdir(f"{WORK_DIR}\\{dir_name}") and dir_name not in dir_names_ignor]
     work_dir_structure = dict()
@@ -162,10 +162,10 @@ def get_work_dir_structure() -> dict or None:
 
 def create_dirs_for_separate():
     """
-    Create 3 directories in work directory. IMG, MOCKUPS, LICENSES
+    Create 2 directories in work directory. MOCKUPS, LICENSES
     :return:
     """
-    dir_names = ('IMG', 'MOCKUPS', 'LICENSES')
+    dir_names = ('MOCKUPS', 'LICENSES')
     for dir_name in dir_names:
         dir_path = f"{WORK_DIR}\\{dir_name}"
         if not os.path.isdir(dir_path):
@@ -175,32 +175,50 @@ def create_dirs_for_separate():
                 print(f"[!] Error: {ex}")
 
 
+def is_exist(extension: str, file_names_list: list) -> bool:
+    """
+    Check directory. If current extension is present in checked list return True
+    :param extension: (value for example '.pdf')
+    :param file_name_list:
+    :return:
+    """
+    if len([file_name for file_name in file_names_list if file_name.endswith(extension)]) > 0:
+        return True
+    else:
+        return False
+
+
 def move_files_to_separ_dirs(work_dir_structure: dict):
     """
     Move files by extensions to dirs
     :param work_dir_structure:
     :return:
     """
-    dir_names = (f"{WORK_DIR}\\IMG", f"{WORK_DIR}\\MOCKUPS", f"{WORK_DIR}\\LICENSES")
+    dir_names = (f"{WORK_DIR}\\MOCKUPS", f"{WORK_DIR}\\LICENSES")
     extensions = {'jpg': dir_names[0],
                   'png': dir_names[0],
-                  'psd': dir_names[1],
-                  'eps': dir_names[1],
-                  'ai': dir_names[1],
-                  'pdf': dir_names[2],
-                  'txt': dir_names[2]}
+                  'psd': dir_names[0],
+                  'eps': dir_names[0],
+                  'ai': dir_names[0],
+                  'pdf': dir_names[1],
+                  'txt': dir_names[1]}
     for src_dir_name, file_names in work_dir_structure.items():
         code = get_unique_code()
-        for file_name in file_names:
-            if file_name.split('.')[-1] not in extensions.keys():
-                continue
-            src = f"{src_dir_name}\\{file_name}"
-            dst = f"{extensions[file_name.split('.')[-1]]}\\{code}_{file_name}"
-            try:
-                os.rename(src, dst)
-            except Exception as ex:
-                print(f"[!] Error: {ex}")
-                print(f"[!] {dst}")
+        # check pdf file is exist in current directory
+        if is_exist('.pdf', file_names):
+            for file_name in file_names:
+                if file_name.split('.')[-1] not in extensions.keys():
+                    continue
+                src = f"{src_dir_name}\\{file_name}"
+                if is_exist('.psd', file_names) or is_exist('.eps', file_names) or is_exist('.ai', file_names):
+                    dst = f"{extensions[file_name.split('.')[-1]]}\\{code}_{file_name}"
+                else:
+                    dst = f"{extensions[file_name.split('.')[-1]]}\\{code}_NO_MOCKUP_{file_name}"
+                try:
+                    os.rename(src, dst)
+                except Exception as ex:
+                    print(f"[!] Error: {ex}")
+                    print(f"[!] {dst}")
 
 
 if __name__ == '__main__':
